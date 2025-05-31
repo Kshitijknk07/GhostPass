@@ -185,30 +185,30 @@ app.get('/verify/:address', async (req, res) => {
     }
 
     // If not in local map, check blockchain as fallback
-    logger.info(`User not in local map, checking blockchain for: ${address}`);
+    // logger.info(`User not in local map, checking blockchain for: ${address}`);
     
-    const isVerified = await Promise.race([
-      contract.isVerified(address),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Contract call timeout')), 10000)
-      )
-    ]);
+    // const isVerified = await Promise.race([
+    //   contract.isVerified(address),
+    //   new Promise((_, reject) => 
+    //     setTimeout(() => reject(new Error('Contract call timeout')), 10000)
+    //   )
+    // ]);
     
     // If verified on blockchain but not in our map, add it
-    if (isVerified) {
-      const userRecord = {
-        address: address,
-        verifiedAt: new Date(),
-        transactionHash: 'unknown' // We don't have the original tx hash
-      };
+    // if (isVerified) {
+    //   const userRecord = {
+    //     address: address,
+    //     verifiedAt: new Date(),
+    //     transactionHash: 'unknown' // We don't have the original tx hash
+    //   };
       
-      verifiedUsersMap.set(normalizedAddress, userRecord);
-      saveVerifiedUsers();
+    //   verifiedUsersMap.set(normalizedAddress, userRecord);
+    //   saveVerifiedUsers();
       
-      logger.info(`Added verified user from blockchain to map: ${address}`);
-    }
+    //   logger.info(`Added verified user from blockchain to map: ${address}`);
+    // }
     
-    logger.info(`Verification status for ${address}: ${isVerified}`);
+    // logger.info(`Verification status for ${address}: ${isVerified}`);
     res.json({ 
       address, 
       isVerified,
