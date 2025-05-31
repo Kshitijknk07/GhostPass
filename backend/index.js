@@ -2,9 +2,16 @@ require('dotenv').config();
 const express = require('express');
 const { ethers } = require('ethers');
 const fs = require('fs');
+const logger = require('./logger');
 
 const app = express();
 app.use(express.json());
+
+// log every incoming request
+app.use((req, res, next) => {
+  logger.info(`${req.method} ${req.url}`);
+  next();
+});
 
 // Load environment variables
 const { PRIVATE_KEY, RPC_URL, CONTRACT_ADDRESS } = process.env;
@@ -24,15 +31,17 @@ app.post('/verify', async (req, res) => {
   const { userAddress } = req.body;
 
   if (!ethers.utils.isAddress(userAddress)) {
+    logger.warn(`Invalid address attempt: ${userAddress}`);
     return res.status(400).json({ error: 'Invalid Ethereum address' });
   }
 
   try {
     const tx = await contract.verifyUser(userAddress);
-    await tx.wait(); // Wait for the transaction to be mined
+    await tx.wait();
+    logger.info(`User verified: ${userAddress}, txHash: ${tx.hash}`);
     res.json({ message: 'User verified successfully', transactionHash: tx.hash });
   } catch (error) {
-    console.error('Error verifying user:', error);
+    logger.error(`Error verifying user: ${error.message}`);
     res.status(500).json({ error: 'Failed to verify user' });
   }
 });
@@ -40,5 +49,5 @@ app.post('/verify', async (req, res) => {
 // Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`GhostPass backend server is running on port ${PORT}`);
+  logger.info(`GhostPass backend server is running on port ${PORT}`);
 });
