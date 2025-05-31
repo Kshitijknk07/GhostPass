@@ -211,7 +211,7 @@ app.get('/verify/:address', async (req, res) => {
     // logger.info(`Verification status for ${address}: ${isVerified}`);
     res.json({ 
       address, 
-      isVerified,
+      isVerified: false,
       ...(isVerified && verifiedUsersMap.has(normalizedAddress) ? {
         verifiedAt: verifiedUsersMap.get(normalizedAddress).verifiedAt,
         transactionHash: verifiedUsersMap.get(normalizedAddress).transactionHash
