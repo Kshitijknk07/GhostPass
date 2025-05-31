@@ -92,9 +92,14 @@ export default function DashboardPage() {
             </span>
           </Link>
           <div className="flex items-center space-x-4">
+          <Link href="/check">
+              <Button variant="ghost" className="text-purple-300 hover:text-purple-100">
+                Check
+              </Button>
+            </Link>
             <Link href="/verify">
               <Button variant="ghost" className="text-purple-300 hover:text-purple-100">
-                Verify Identity
+                Verify
               </Button>
             </Link>
             {isConnected ? (
