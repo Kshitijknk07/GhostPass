@@ -151,5 +151,5 @@ app.get('/health', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
   logger.info(`GhostPass backend server is running on port ${PORT}`);
-  // await verifyContractDeployment();
+  await verifyContractDeployment();
 });
