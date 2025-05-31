@@ -65,6 +65,11 @@ export default function HomePage() {
                 Verify
               </Button>
             </Link>
+            <Link href="/check">
+              <Button variant="ghost" className="text-purple-300 hover:text-purple-100">
+                Check
+              </Button>
+            </Link>
             {isConnected ? (
               <Badge variant="outline" className="border-green-500 text-green-400">
                 <Wallet className="h-4 w-4 mr-2" />
