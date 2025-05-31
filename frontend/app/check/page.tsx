@@ -174,7 +174,7 @@ export default function VerifyPage() {
 
           <div className="grid gap-6">
             {/* Self Verification */}
-            <Card className="bg-black/40 border-purple-500/30 backdrop-blur-xl">
+            {/*<Card className="bg-black/40 border-purple-500/30 backdrop-blur-xl">
               <CardHeader>
                 <CardTitle className="text-white flex items-center">
                   <Shield className="h-6 w-6 mr-2 text-purple-400" />
@@ -220,10 +220,10 @@ export default function VerifyPage() {
                   </div>
                 )}
               </CardContent>
-            </Card>
+            </Card>*/}
 
             {/* Check Other Wallets */}
-            {/*<Card className="bg-black/40 border-cyan-500/30 backdrop-blur-xl">
+            <Card className="bg-black/40 border-cyan-500/30 backdrop-blur-xl">
               <CardHeader>
                 <CardTitle className="text-white flex items-center">
                   <Wallet className="h-6 w-6 mr-2 text-cyan-400" />
@@ -265,7 +265,7 @@ export default function VerifyPage() {
                   )}
                 </Button>
               </CardContent>
-            </Card> */}
+            </Card>
 
             {/* Status Messages */}
             {message && (
