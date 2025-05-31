@@ -3,6 +3,8 @@ const express = require('express');
 const { ethers } = require('ethers');
 const fs = require('fs');
 const logger = require('./logger');
+const cors = require('cors');
+app.use(cors());
 
 const app = express();
 app.use(express.json());
