@@ -30,7 +30,7 @@ const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, wallet);
 
 // API endpoint to verify a user
-app.post('/verify', async (req, res) => {
+app.post('    ', async (req, res) => {
   const { userAddress } = req.body;
 
   if (!ethers.isAddress(userAddress)) { // Updated for ethers v6
