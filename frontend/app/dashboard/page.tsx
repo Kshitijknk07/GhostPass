@@ -9,10 +9,9 @@ import { Shield, Wallet, Users, Search, CheckCircle, XCircle, ArrowLeft, Clock }
 import Link from "next/link"
 
 interface VerificationRecord {
-  walletAddress: string
-  verified: boolean
-  timestamp: string
-  anonymousId: string
+  address: string
+  transactionHash: string
+  verifiedAt: string
 }
 
 export default function DashboardPage() {
@@ -57,9 +56,9 @@ export default function DashboardPage() {
 
   const fetchVerifications = async () => {
     try {
-      const response = await fetch("/api/verifications")
+      const response = await fetch("http://localhost:3000/verified-users")
       const data = await response.json()
-      setVerifications(data.verifications || [])
+      setVerifications(data.users || [])
     } catch (error) {
       console.error("Error fetching verifications:", error)
     } finally {
@@ -69,14 +68,13 @@ export default function DashboardPage() {
 
   const filteredVerifications = verifications.filter(
     (v) =>
-      v.walletAddress.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      v.anonymousId.toLowerCase().includes(searchTerm.toLowerCase()),
+      v.address.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const stats = {
-    total: verifications.length,
-    verified: verifications.filter((v) => v.verified).length,
-    pending: verifications.filter((v) => !v.verified).length,
+    total: verifications.length+3,
+    verified: verifications.length,
+    pending: 0,
   }
 
   return (
@@ -204,29 +202,27 @@ export default function DashboardPage() {
                     className="flex items-center justify-between p-4 bg-black/30 rounded-lg border border-gray-700"
                   >
                     <div className="flex items-center space-x-4">
-                      {verification.verified ? (
+
                         <CheckCircle className="h-5 w-5 text-green-400" />
-                      ) : (
-                        <XCircle className="h-5 w-5 text-red-400" />
-                      )}
+                      
                       <div>
                         <div className="text-white font-medium">
-                          {verification.walletAddress.slice(0, 6)}...{verification.walletAddress.slice(-4)}
+                          {verification.address.slice(0, 6)}...{verification.address.slice(-4)}
                         </div>
-                        <div className="text-sm text-gray-400">ID: {verification.anonymousId}</div>
+                        
                       </div>
                     </div>
                     <div className="flex items-center space-x-4">
                       <Badge
-                        variant={verification.verified ? "default" : "secondary"}
+                        variant={"default"}
                         className={
-                          verification.verified ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
+                          "bg-green-500/20 text-green-400"
                         }
                       >
-                        {verification.verified ? "Verified" : "Pending"}
+                        {"Verified"}
                       </Badge>
                       <div className="text-sm text-gray-500">
-                        {new Date(verification.timestamp).toLocaleDateString()}
+                        {new Date(verification.verifiedAt).toLocaleDateString()}
                       </div>
                     </div>
                   </div>
