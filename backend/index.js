@@ -212,10 +212,8 @@ app.get('/verify/:address', async (req, res) => {
     res.json({ 
       address, 
       isVerified: false,
-      ...(isVerified && verifiedUsersMap.has(normalizedAddress) ? {
-        verifiedAt: verifiedUsersMap.get(normalizedAddress).verifiedAt,
-        transactionHash: verifiedUsersMap.get(normalizedAddress).transactionHash
-      } : {}),
+      verifiedAt: 'not verified',
+      transactionHash: 'not available',
       source: 'blockchain'
     });
     
