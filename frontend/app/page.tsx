@@ -1,103 +1,224 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
+import { useState, useEffect } from "react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Shield, Eye, Users, Zap, ArrowRight, Wallet, CheckCircle } from "lucide-react"
+
+export default function HomePage() {
+  const [isConnected, setIsConnected] = useState(false)
+  const [account, setAccount] = useState("")
+
+  useEffect(() => {
+    checkConnection()
+  }, [])
+
+  const checkConnection = async () => {
+    if (typeof window.ethereum !== "undefined") {
+      try {
+        const accounts = await window.ethereum.request({ method: "eth_accounts" })
+        if (accounts.length > 0) {
+          setIsConnected(true)
+          setAccount(accounts[0])
+        }
+      } catch (error) {
+        console.error("Error checking connection:", error)
+      }
+    }
+  }
+
+  const connectWallet = async () => {
+    if (typeof window.ethereum !== "undefined") {
+      try {
+        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" })
+        setIsConnected(true)
+        setAccount(accounts[0])
+      } catch (error) {
+        console.error("Error connecting wallet:", error)
+      }
+    } else {
+      alert("Please install MetaMask!")
+    }
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Navigation */}
+      <nav className="border-b border-purple-500/20 bg-black/20 backdrop-blur-xl">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Shield className="h-8 w-8 text-purple-400" />
+            <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+              darkID
+            </span>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Link href="/dashboard">
+              <Button variant="ghost" className="text-purple-300 hover:text-purple-100">
+                Dashboard
+              </Button>
+            </Link>
+            <Link href="/verify">
+              <Button variant="ghost" className="text-purple-300 hover:text-purple-100">
+                Verify
+              </Button>
+            </Link>
+            {isConnected ? (
+              <Badge variant="outline" className="border-green-500 text-green-400">
+                <Wallet className="h-4 w-4 mr-2" />
+                {account.slice(0, 6)}...{account.slice(-4)}
+              </Badge>
+            ) : (
+              <Button
+                onClick={connectWallet}
+                className="bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700"
+              >
+                <Wallet className="h-4 w-4 mr-2" />
+                Connect Wallet
+              </Button>
+            )}
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="container mx-auto px-4 py-20 text-center">
+        <div className="max-w-4xl mx-auto">
+          <Badge className="mb-6 bg-purple-500/20 text-purple-300 border-purple-500/30">
+            Decentralized Identity Protocol
+          </Badge>
+          <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent">
+            Anonymous Verified Identity
+          </h1>
+          <p className="text-xl text-gray-300 mb-8 leading-relaxed">
+            Prove your identity without revealing who you are. darkID enables platforms to verify users while
+            maintaining complete anonymity through blockchain technology.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/verify">
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 text-lg px-8 py-6"
+              >
+                Start Verification
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+            <Link href="/dashboard">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-purple-500/50 text-purple-300 hover:bg-purple-500/10 text-lg px-8 py-6"
+              >
+                View Dashboard
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold mb-4 text-white">How darkID Works</h2>
+          <p className="text-gray-400 text-lg">Three core principles that power anonymous verification</p>
+        </div>
+        <div className="grid md:grid-cols-3 gap-8">
+          <Card className="bg-black/40 border-purple-500/30 backdrop-blur-xl">
+            <CardHeader>
+              <Shield className="h-12 w-12 text-purple-400 mb-4" />
+              <CardTitle className="text-white">Anonymous Verification</CardTitle>
+              <CardDescription className="text-gray-400">
+                Verify your identity without revealing personal information. Your verification status is
+                cryptographically proven.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+          <Card className="bg-black/40 border-cyan-500/30 backdrop-blur-xl">
+            <CardHeader>
+              <Eye className="h-12 w-12 text-cyan-400 mb-4" />
+              <CardTitle className="text-white">Zero Knowledge</CardTitle>
+              <CardDescription className="text-gray-400">
+                Platforms can verify you're a real, unique user without accessing any personal data or tracking
+                behavior.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+          <Card className="bg-black/40 border-green-500/30 backdrop-blur-xl">
+            <CardHeader>
+              <Users className="h-12 w-12 text-green-400 mb-4" />
+              <CardTitle className="text-white">Decentralized Trust</CardTitle>
+              <CardDescription className="text-gray-400">
+                No central authority controls your identity. The blockchain ensures immutable verification records.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+      </section>
+
+      {/* Stats */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="grid md:grid-cols-4 gap-8 text-center">
+          <div className="space-y-2">
+            <div className="text-4xl font-bold text-purple-400">1,247</div>
+            <div className="text-gray-400">Verified Identities</div>
+          </div>
+          <div className="space-y-2">
+            <div className="text-4xl font-bold text-cyan-400">100%</div>
+            <div className="text-gray-400">Anonymous</div>
+          </div>
+          <div className="space-y-2">
+            <div className="text-4xl font-bold text-green-400">0</div>
+            <div className="text-gray-400">Data Breaches</div>
+          </div>
+          <div className="space-y-2">
+            <div className="text-4xl font-bold text-yellow-400">24/7</div>
+            <div className="text-gray-400">Decentralized</div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="container mx-auto px-4 py-20">
+        <Card className="bg-gradient-to-r from-purple-900/50 to-cyan-900/50 border-purple-500/30 backdrop-blur-xl">
+          <CardContent className="p-12 text-center">
+            <Zap className="h-16 w-16 text-yellow-400 mx-auto mb-6" />
+            <h3 className="text-3xl font-bold text-white mb-4">Ready to Go Anonymous?</h3>
+            <p className="text-gray-300 mb-8 text-lg">
+              Join the future of identity verification. Maintain your privacy while proving your authenticity.
+            </p>
+            {isConnected ? (
+              <Link href="/verify">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 text-lg px-8 py-6"
+                >
+                  <CheckCircle className="mr-2 h-5 w-5" />
+                  Start Verification Process
+                </Button>
+              </Link>
+            ) : (
+              <Button
+                onClick={connectWallet}
+                size="lg"
+                className="bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 text-lg px-8 py-6"
+              >
+                <Wallet className="mr-2 h-5 w-5" />
+                Connect Wallet to Begin
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-purple-500/20 bg-black/20 backdrop-blur-xl">
+        <div className="container mx-auto px-4 py-8 text-center text-gray-400">
+          <p>&copy; 2024 darkID. Decentralized. Anonymous. Verified.</p>
+        </div>
       </footer>
     </div>
-  );
+  )
 }
