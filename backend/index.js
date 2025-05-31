@@ -18,9 +18,22 @@ app.use((req, res, next) => {
 // Load environment variables
 const { PRIVATE_KEY, RPC_URL, CONTRACT_ADDRESS } = process.env;
 
+// Validate environment variables
+if (!PRIVATE_KEY || !RPC_URL || !CONTRACT_ADDRESS) {
+  logger.error('Missing required environment variables');
+  process.exit(1);
+}
+
 // Load contract ABI - extract just the ABI array from the artifact
-const contractArtifact = JSON.parse(fs.readFileSync('./abi.json', 'utf8'));
-const abi = contractArtifact.abi; // Extract the ABI array
+let abi;
+try {
+  const contractArtifact = JSON.parse(fs.readFileSync('./abi.json', 'utf8'));
+  abi = contractArtifact.abi; // Extract the ABI array
+  logger.info(`ABI loaded successfully with ${abi.length} items`);
+} catch (error) {
+  logger.error(`Failed to load ABI: ${error.message}`);
+  process.exit(1);
+}
 
 // Set up provider and wallet (updated for ethers v6)
 const provider = new ethers.JsonRpcProvider(RPC_URL);
@@ -29,20 +42,38 @@ const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 // Create contract instance
 const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, wallet);
 
-// API endpoint to verify a user
-app.post('    ', async (req, res) => {
-  const { userAddress } = req.body;
+// Verify contract deployment on startup
+async function verifyContractDeployment() {
+  try {
+    const code = await provider.getCode(CONTRACT_ADDRESS);
+    if (code === '0x') {
+      logger.error('No contract found at the specified address');
+      process.exit(1);
+    }
+    logger.info('Contract verified at address:', CONTRACT_ADDRESS);
+    
+    // Test if we can call a view function
+    const owner = await contract.owner();
+    logger.info('Contract owner:', owner);
+  } catch (error) {
+    logger.error('Contract verification failed:', error.message);
+  }
+}
 
-  if (!ethers.isAddress(userAddress)) { // Updated for ethers v6
-    logger.warn(`Invalid address attempt: ${userAddress}`);
+// API endpoint to verify a user - FIXED the route path
+app.post('/verify', async (req, res) => {
+  const { walletAddress } = req.body;
+
+  if (!ethers.isAddress(walletAddress)) {
+    logger.warn(`Invalid address attempt: ${walletAddress}`);
     return res.status(400).json({ error: 'Invalid Ethereum address' });
   }
 
   try {
     // For batch verification, pass as array
-    const tx = await contract.verifyUser([userAddress]);
+    const tx = await contract.verifyUser([walletAddress]);
     await tx.wait();
-    logger.info(`User verified: ${userAddress}, txHash: ${tx.hash}`);
+    logger.info(`User verified: ${walletAddress}, txHash: ${tx.hash}`);
     res.json({ message: 'User verified successfully', transactionHash: tx.hash });
   } catch (error) {
     logger.error(`Error verifying user: ${error.message}`);
@@ -50,7 +81,7 @@ app.post('    ', async (req, res) => {
   }
 });
 
-// API endpoint to check if a user is verified
+// API endpoint to check if a user is verified - ENHANCED with better error handling
 app.get('/verify/:address', async (req, res) => {
   const { address } = req.params;
 
@@ -60,12 +91,33 @@ app.get('/verify/:address', async (req, res) => {
   }
 
   try {
-    const isVerified = await contract.isVerified(address);
-    logger.info(`Verification status checked for: ${address}, status: ${isVerified}`);
+    logger.info(`Checking verification status for: ${address}`);
+    
+    // Add timeout and better error handling
+    const isVerified = await Promise.race([
+      contract.isVerified(address),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Contract call timeout')), 10000)
+      )
+    ]);
+    
+    logger.info(`Verification status for ${address}: ${isVerified}`);
     res.json({ address, isVerified });
   } catch (error) {
-    logger.error(`Error checking verification status: ${error.message}`);
-    res.status(500).json({ error: 'Failed to check verification status' });
+    logger.error(`Error checking verification status for ${address}: ${error.message}`);
+    
+    // More detailed error response
+    let errorMessage = 'Failed to check verification status';
+    if (error.message.includes('could not decode result data')) {
+      errorMessage = 'Contract function call failed - possibly wrong contract address or ABI mismatch';
+    } else if (error.message.includes('timeout')) {
+      errorMessage = 'Contract call timed out';
+    }
+    
+    res.status(500).json({ 
+      error: errorMessage,
+      details: error.message 
+    });
   }
 });
 
@@ -97,6 +149,7 @@ app.get('/health', (req, res) => {
 
 // Start the server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   logger.info(`GhostPass backend server is running on port ${PORT}`);
+  // await verifyContractDeployment();
 });
