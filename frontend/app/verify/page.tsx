@@ -70,7 +70,7 @@ export default function VerifyPage() {
       })
 
       // Call verification API
-      const response = await fetch("/api/verify", {
+      const response = await fetch("http://localhost:3000/verify", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -111,7 +111,7 @@ export default function VerifyPage() {
     setVerificationStatus("idle")
 
     try {
-      const response = await fetch(`/api/verify/${walletAddress}`)
+      const response = await fetch(`http://localhost:3000/verify/${walletAddress}`)
       const result = await response.json()
 
       if (response.ok) {
@@ -133,6 +133,12 @@ export default function VerifyPage() {
       setIsVerifying(false)
     }
   }
+
+  useEffect(() => {
+    if (walletAddress && verificationStatus !== "success") {
+      verifyWalletAddress()
+    }
+  }, [walletAddress])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
